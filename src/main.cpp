@@ -5,11 +5,12 @@
 //Created: January 20, 2026
 //******************************************************************************
 
-#include <print>
+#include "managementInformationSystem.hpp"
 
 
 int main()
 {
-    std::println("Sup yo?");
+    ManagementInformationSystem system;
+    system.login();
 }
     
