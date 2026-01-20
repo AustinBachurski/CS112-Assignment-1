@@ -1,15 +1,19 @@
 //******************************************************************************
-//File Name: main.cpp
-//Description: Entry point for CS112: Assignment 1.
+//File Name: employee.hpp
+//Description: Employee base class for CS112: Assignment 1.
 //Author: Austin Bachurski
 //Created: January 20, 2026
 //******************************************************************************
 
-#include <print>
+#ifndef EMPLOYEE_BASE_HPP
+#define EMPLOYEE_BASE_HPP
 
-
-int main()
+class Employee
 {
-    std::println("Sup yo?");
-}
-    
+    virtual ~Employee() = default;
+
+
+};
+
+#endif
+
