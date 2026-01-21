@@ -25,3 +25,17 @@
 1. Build the project: `cmake --build build`
 1. Run the application: `./build/bin/assignment1`
 
+## Output
+
+Follow on screen prompts to demonstrate functionality.
+
+## Screenshots
+
+|||
+|:-:|:-:|:-:|
+|![login example](screenshots/login.png)|![hr menu example](screenshots/hr-menu.png)|![basic menu example](screenshots/basic-menu.png)|
+|![view self example](screenshots/view-self.png)|![view all example](screenshots/hr-menu.png)|![view example](screenshots/id-search.png)|
+|![remove example](screenshots/name-search.png)|![view all example](screenshots/add-new.png)|![view example](screenshots/remove.png)|
+|![search by name example](screenshots/view-all.png)|![search by id example](screenshots/modify-menu.png)|![basic menu example](screenshots/id-updated.png)|
+|![search by name example](screenshots/name-updated.png)|![search by id example](screenshots/password-updated.png)|![basic menu example](screenshots/title-updated.png)|
+
