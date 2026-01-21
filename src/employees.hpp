@@ -14,11 +14,14 @@
 #include <string_view>
 
 
+// Employee base class.
 class Employee
 {
 public:
+    // Destructor must be declared as virtual when using virtual functions.
     virtual ~Employee() = default;
 
+    // Builder object that makes Employee object construction easier.
     struct EmployeeBuilder
     {
         unsigned id;
@@ -26,16 +29,27 @@ public:
         std::string_view password;
     };
 
+    // Getters for various fields.
     unsigned getID() const { return m_id; }
     std::string_view getName() const { return m_name; } 
     std::string_view getPassword() const { return m_password; } 
+
+    // Password comparison.
     bool isCorrectPassword(std::string_view password) const { return password == m_password; }
+
+    // Setters for various fields.
     void setID(unsigned id) { m_id = id; }
     void setName(std::string_view name) { m_name = name; }
     void setPassword(std::string_view password) { m_password = password; }
 
+    // Virtual function that displays the available menu options for a given employee type.
     virtual void displayMenu() const = 0;
+
+    // Virtual function that returns the title of a given employee type as a 
+    // string_view.  Used for printing an Employee object.
     virtual std::string_view getTitle() const = 0;
+
+    // Virtual functions to enable functionality based on a given employee type.
     virtual bool canViewEmployees() const = 0;
     virtual bool canSearchEmployees() const = 0;
     virtual bool canModifyEmployee() const = 0;
@@ -43,6 +57,7 @@ public:
     virtual bool canRemoveEmployee() const = 0;
 
 protected:
+    // Hide base class constructor.
     Employee(EmployeeBuilder const &params)
     : m_id{ params.id }
     , m_name{ params.name }
@@ -50,11 +65,13 @@ protected:
     {}
 
 private:
+    // Private id, name, and password fields.
     unsigned m_id{};
     std::string m_name;
     std::string m_password;
 };
 
+// General Employee derived class.
 class GeneralEmployee : public Employee
 {
 public:
@@ -81,6 +98,7 @@ public:
     bool canRemoveEmployee()    const override  { return false; }
 };
 
+// Human Resources Employee derived class.
 class HumanResourcesEmployee : public Employee
 {
 public:
@@ -111,6 +129,7 @@ public:
     bool canRemoveEmployee()    const override  { return true; }
 };
 
+// Manager Employee derived class.
 class ManagerEmployee : public Employee
 {
 public:
@@ -138,6 +157,10 @@ public:
     bool canRemoveEmployee()    const override  { return false; }
 };
 
+// The std::formatter object is required by the std::print and std::println functions of the 
+// C++ Standard Template Library.  It defines how the object will be printed.
+// In this case, it is the Employee object.  The title for the derived classes
+// is retrieved by a virtual function call.
 template<>
 struct std::formatter<Employee>
 {

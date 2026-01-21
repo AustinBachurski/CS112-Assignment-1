@@ -21,6 +21,7 @@
 #include <utility>
 
 
+// Anonymous namespace for helper functions.
 namespace
 {
 
