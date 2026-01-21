@@ -31,7 +31,7 @@ Follow on screen prompts to demonstrate functionality.
 
 ## Screenshots
 
-|||
+||||
 |:-:|:-:|:-:|
 |![login example](screenshots/login.png)|![hr menu example](screenshots/hr-menu.png)|![basic menu example](screenshots/basic-menu.png)|
 |![view self example](screenshots/view-self.png)|![view all example](screenshots/hr-menu.png)|![view example](screenshots/id-search.png)|
