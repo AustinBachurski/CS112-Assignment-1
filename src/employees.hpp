@@ -26,9 +26,13 @@ public:
         std::string_view password;
     };
 
-    unsigned getID() const { return id; }
-    std::string_view getName() const { return name; } 
-    bool isCorrectPassword(std::string_view userPassword) const { return userPassword == password; }
+    unsigned getID() const { return m_id; }
+    std::string_view getName() const { return m_name; } 
+    std::string_view getPassword() const { return m_password; } 
+    bool isCorrectPassword(std::string_view password) const { return password == m_password; }
+    void setID(unsigned id) { m_id = id; }
+    void setName(std::string_view name) { m_name = name; }
+    void setPassword(std::string_view password) { m_password = password; }
 
     virtual void displayMenu() const = 0;
     virtual std::string_view getTitle() const = 0;
@@ -40,15 +44,15 @@ public:
 
 protected:
     Employee(EmployeeBuilder const &params)
-    : id{ params.id }
-    , name{ params.name }
-    , password{ params.password }
+    : m_id{ params.id }
+    , m_name{ params.name }
+    , m_password{ params.password }
     {}
 
 private:
-    unsigned id{};
-    std::string name;
-    std::string password;
+    unsigned m_id{};
+    std::string m_name;
+    std::string m_password;
 };
 
 class GeneralEmployee : public Employee
