@@ -21,7 +21,12 @@ public:
 
 
 private:
-    void menu();
+    void displayMenu();
+    void viewEmployees() const;
+    void searchEmployees() const;
+    void modifyEmployee();
+    void addEmployee();
+    void removeEmployee();
 
     std::vector<std::unique_ptr<Employee>> employees;
     Employee *loggedInUser{ nullptr };
