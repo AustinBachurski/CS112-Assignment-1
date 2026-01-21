@@ -21,6 +21,8 @@ public:
 
 
 private:
+    void menu();
+
     std::vector<std::unique_ptr<Employee>> employees;
     Employee *loggedInUser{ nullptr };
 

@@ -1,6 +1,6 @@
 //******************************************************************************
-//File Name: menu.cpp
-//Description: Menu implementation for CS112: Assignment 1
+//File Name: managementInformationSystem.cpp
+//Description: Implementation for managementInformationSystem object.
 //Author: Austin Bachurski
 //Created: January 20, 2026
 //******************************************************************************
@@ -9,6 +9,7 @@
 #include "employees.hpp"
 
 #include <algorithm>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -21,6 +22,13 @@
 
 namespace
 {
+[[noreturn]]
+void invalidInput(std::string_view const line)
+{
+    std::println("Invalid input encountered!");
+    std::println("Found: {}", line);
+    std::exit(1);
+}
 
 std::unique_ptr<Employee> makeEmployee(std::string_view line)
 {
@@ -34,12 +42,29 @@ std::unique_ptr<Employee> makeEmployee(std::string_view line)
             {
                 if (fieldsIter == fields.end())
                 { 
-                    std::println("Unable to parse input: {}", line);
+                    invalidInput(line);
                 }
                 return *fieldsIter++;
             }};
 
-        return std::make_unique<HumanResources>(nextField(), nextField());
+        Employee::EmployeeBuilder params{ nextField(), nextField() };
+
+        auto type{ nextField() };
+
+        if (type == "GeneralEmployee")
+        {
+            return std::make_unique<GeneralEmployee>(params);
+        }
+        else if (type == "HumanResourcesEmployee")
+        {
+            return std::make_unique<HumanResourcesEmployee>(params);
+        }
+        else if (type == "ManagerEmployee")
+        {
+            return std::make_unique<ManagerEmployee>(params);
+        }
+
+        invalidInput(line);
 }
 
 std::vector<std::unique_ptr<Employee>> populateEmployeesFromFile(std::filesystem::path pathToCSV)
@@ -125,6 +150,25 @@ Employee *requestUserLogin(std::span<std::unique_ptr<Employee>> employees)
     return nullptr;
 }
 
+void displayMenuForUser(Employee *user)
+{
+    std::println("{}", *user);
+}
+
+enum class MenuSelection
+{
+    exit,
+    view,
+    search,
+    modify,
+    add,
+    remove,
+};
+
+void performSelectedAction(Employee *user, MenuSelection selection)
+{
+}
+
 } // anonymous namespace
 
 void ManagementInformationSystem::login()
@@ -140,3 +184,29 @@ void ManagementInformationSystem::login()
     loggedInUser = requestUserLogin(employees);
 }
 
+void ManagementInformationSystem::menu()
+{
+    displayMenuForUser(loggedInUser);
+
+    std::string line;
+    unsigned selection{};
+
+    while (true)
+    {
+        std::getline(std::cin, line);
+
+
+        if (std::from_chars(line.data(), line.data() + line.size(), selection).ec == std::errc{})
+        {
+            break;
+        }
+
+        std::println("Invalid selection.  Expected an integer, got {}.", line);
+        displayMenuForUser(loggedInUser);
+    }
+
+    switch (selection)
+    {
+        case
+    }
+}
