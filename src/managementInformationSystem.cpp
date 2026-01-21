@@ -18,6 +18,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
 
 
 namespace
@@ -170,7 +171,7 @@ Employee *requestUserLogin(std::span<std::unique_ptr<Employee>> employees)
 
     while (true)
     {
-        std::print("Enter password for {}: ", employee->getID());
+        std::print("Enter password for ID {}: ", employee->getID());
         std::getline(std::cin, input);
 
         if (employee->isCorrectPassword(input))
@@ -207,9 +208,9 @@ unsigned getIdFromConsole()
     }
 }
 
-std::string getNameFromConsole()
+std::string getStringArgFromConsole(std::string_view arg)
 {
-    std::print("Enter an employee name: ");
+    std::print("Enter an employee {}: ", arg);
 
     std::string line;
     std::getline(std::cin, line);
@@ -241,7 +242,7 @@ void searchByID(std::span<std::unique_ptr<Employee> const> employees)
 
 void searchByName(std::span<std::unique_ptr<Employee> const> employees)
 {
-    std::string name{ getNameFromConsole() };
+    std::string name{ getStringArgFromConsole("name") };
 
     auto nameIs{ [&name](std::unique_ptr<Employee> const &employee)
                          {
@@ -298,6 +299,298 @@ void searchEmployeesBy(std::span<std::unique_ptr<Employee> const> employees)
         }
 
         std::println("Invalid selection.");
+    }
+}
+
+void removeCurrentEmployee(std::vector<std::unique_ptr<Employee>> &employees)
+{
+    unsigned id{ getIdFromConsole() };
+
+    auto idIs{ [id](std::unique_ptr<Employee> const &employee)
+                         {
+                            return employee->getID() == id;
+                         } };
+
+    auto found{ std::ranges::find_if(employees, idIs) };
+
+    if (found == employees.end())
+    {
+        clearScreen();
+        std::println("Employee ID: \"{}\" was not found in the database.", id);
+        clearScreenWhenReady();
+        return;
+    }
+
+    std::println("Employee:\n\n{}\nhas been removed from the database.\n", **found);
+
+    std::erase_if(employees, idIs);
+
+    clearScreenWhenReady();
+}
+
+bool contains(std::span<std::unique_ptr<Employee> const> employees, unsigned const id)
+{
+    return std::ranges::find_if( employees, [id](std::unique_ptr<Employee> const &employee)
+        { return employee->getID() == id; } ) != employees.end();
+}
+
+unsigned getValidId(std::span<std::unique_ptr<Employee> const> employees)
+{
+    unsigned id{};
+
+    while (true)
+    {
+        id = getIdFromConsole();
+
+        if (contains(employees, id))
+        {
+            std::println("ID {} already exists in the database, try again.", id);
+        }
+        else
+        {
+            return id;
+        }
+    }
+}
+
+void addNewEmployee(std::vector<std::unique_ptr<Employee>> &employees)
+{
+    unsigned id{ getValidId(employees) };
+    std::string name{ getStringArgFromConsole("name") };
+    std::string password{ getStringArgFromConsole("password") };
+
+    std::string type;
+
+    while (true)
+    {
+        type = getStringArgFromConsole("employee type");
+        
+        if (type == "GeneralEmployee")
+        {
+            employees.push_back(std::make_unique<GeneralEmployee>(Employee::EmployeeBuilder{ id, name, password }));
+            break;
+        }
+        else if (type == "HumanResourcesEmployee")
+        {
+            employees.push_back(std::make_unique<HumanResourcesEmployee>(Employee::EmployeeBuilder{ id, name, password }));
+            break;
+        }
+        else if (type == "ManagerEmployee")
+        {
+            employees.push_back(std::make_unique<ManagerEmployee>(Employee::EmployeeBuilder{ id, name, password }));
+            break;
+        }
+
+        std::println("{} is not a valid employee type, try again.", type);
+    }
+
+    std::println("Employee:\n\n{}\nhas been added to the database.\n", *employees.back());
+    clearScreenWhenReady();
+}
+
+unsigned getExistingEmployeeId(std::span<std::unique_ptr<Employee> const> employees)
+{
+    unsigned id{};
+
+    while (true)
+    {
+        id = getIdFromConsole();
+
+        auto found{ std::ranges::find_if(employees, [id](std::unique_ptr<Employee> const &employee)
+                                         {
+                                             return employee->getID() == id;
+                                         }) };
+
+        if (found != employees.end())
+        {
+            std::println("Found employee:\n\n{}", **found);
+            return id;
+        }
+
+        std::println("Employee ID: \"{}\" was not found in the database.", id);
+    }
+}
+
+enum struct Field : unsigned
+{
+    invalid,
+    id,
+    name,
+    password,
+    title,
+    count,
+};
+
+Field selectFieldToModify()
+{
+    std::println("Select a field to modify.\n1. ID\n2. Name\n3. Password\n4. Title");
+
+    std::string input;
+    unsigned selection{};
+
+    while (true)
+    {
+        std::getline(std::cin, input);
+
+        if (std::from_chars(input.data(), input.data() + input.size(), selection).ec == std::errc{})
+        {
+            if (Field{ selection } > Field::invalid && Field{ selection } < Field::count)
+            {
+                clearScreen();
+                return Field{selection};
+            }
+        }
+
+        std::println("Invalid selection.");
+    }
+}
+
+void modifyEmployeeId(std::vector<std::unique_ptr<Employee>> &employees, unsigned id)
+{
+    auto found{ std::ranges::find_if(employees, [id](std::unique_ptr<Employee> const &employee)
+                         {
+                            return employee->getID() == id;
+                         }) };
+
+    if (found != employees.end())
+    {
+        (*found)->setID(getValidId(employees));
+
+        clearScreen();
+        std::println("Employee ID updated\n\n{}\n", **found);
+        clearScreenWhenReady();
+    }
+    else
+    {
+        // ID should already be verified before calling this function.
+        std::unreachable();
+    }
+}
+
+void modifyEmployeeName(std::vector<std::unique_ptr<Employee>> &employees, unsigned id)
+{
+    auto found{ std::ranges::find_if(employees, [id](std::unique_ptr<Employee> const &employee)
+                         {
+                            return employee->getID() == id;
+                         }) };
+
+    if (found != employees.end())
+    {
+        (*found)->setName(getStringArgFromConsole("name"));
+
+        clearScreen();
+        std::println("Employee name updated\n\n{}\n", **found);
+        clearScreenWhenReady();
+    }
+    else
+    {
+        // ID should already be verified before calling this function.
+        std::unreachable();
+    }
+}
+
+void modifyEmployeePassword(std::vector<std::unique_ptr<Employee>> &employees, unsigned id)
+{
+    auto found{ std::ranges::find_if(employees, [id](std::unique_ptr<Employee> const &employee)
+                         {
+                            return employee->getID() == id;
+                         }) };
+
+    if (found != employees.end())
+    {
+        (*found)->setPassword(getStringArgFromConsole("password"));
+
+        clearScreen();
+        std::println("Employee password updated\n\n{}\n", **found);
+        clearScreenWhenReady();
+    }
+    else
+    {
+        // ID should already be verified before calling this function.
+        std::unreachable();
+    }
+}
+
+void modifyEmployeeTitle(std::vector<std::unique_ptr<Employee>> &employees, unsigned id)
+{
+    auto idIs{ [id](std::unique_ptr<Employee> const &employee)
+                         {
+                            return employee->getID() == id;
+                         } };
+
+    auto found{ std::ranges::find_if(employees, idIs) };
+
+    if (found == employees.end())
+    {
+        // ID should already be verified before calling this function.
+        std::unreachable();
+    }
+
+    std::string name{ (*found)->getName() };
+    std::string password{ (*found)->getPassword() };
+
+
+    std::string type;
+
+    while (true)
+    {
+        type = getStringArgFromConsole("employee type");
+        
+        if (type == "GeneralEmployee")
+        {
+            std::erase_if(employees, idIs);
+            employees.push_back(std::make_unique<GeneralEmployee>(Employee::EmployeeBuilder{ id, name, password }));
+            break;
+        }
+        else if (type == "HumanResourcesEmployee")
+        {
+            std::erase_if(employees, idIs);
+            employees.push_back(std::make_unique<HumanResourcesEmployee>(Employee::EmployeeBuilder{ id, name, password }));
+            break;
+        }
+        else if (type == "ManagerEmployee")
+        {
+            std::erase_if(employees, idIs);
+            employees.push_back(std::make_unique<ManagerEmployee>(Employee::EmployeeBuilder{ id, name, password }));
+            break;
+        }
+
+        std::println("{} is not a valid employee type, try again.", type);
+    }
+
+    found = std::ranges::find_if(employees, idIs);
+
+    if (found == employees.end())
+    {
+        std::println("Error updating database!");
+    }
+
+    clearScreen();
+    std::println("Employee title updated\n\n{}\n", **found);
+    clearScreenWhenReady();
+}
+
+void modifyExistingEmployee(std::vector<std::unique_ptr<Employee>> &employees)
+{
+    std::println("Which employee do you wish to modify?");
+
+    unsigned id{ getExistingEmployeeId(employees) };
+
+    Field field{ selectFieldToModify() };
+
+    switch (field)
+    {
+        case Field::id:
+            return modifyEmployeeId(employees, id);
+        case Field::name:
+            return modifyEmployeeName(employees, id);
+        case Field::password:
+            return modifyEmployeePassword(employees, id);
+        case Field::title:
+            return modifyEmployeeTitle(employees, id);
+        case Field::invalid: [[fallthrough]];
+        case Field::count:
+            std::unreachable();
     }
 }
 
@@ -376,7 +669,7 @@ void ManagementInformationSystem::displayMenu()
             }
         }
         else
-        {
+    {
             std::println("Invalid selection.  Expected an integer, got {}.", line);
         }
 
@@ -397,7 +690,7 @@ void ManagementInformationSystem::viewEmployees() const
 
     for (auto const &employee : employees)
     {
-         std::println("{}", *employee);
+        std::println("{}", *employee);
     }
 
     std::println("***************************************");
@@ -420,6 +713,8 @@ void ManagementInformationSystem::modifyEmployee()
     {
         return nope();
     }
+
+    modifyExistingEmployee(employees);
 }
 
 void ManagementInformationSystem::addEmployee()
@@ -428,6 +723,8 @@ void ManagementInformationSystem::addEmployee()
     {
         return nope();
     }
+
+    addNewEmployee(employees);
 }
 
 void ManagementInformationSystem::removeEmployee()
@@ -436,5 +733,7 @@ void ManagementInformationSystem::removeEmployee()
     {
         return nope();
     }
+
+    removeCurrentEmployee(employees);
 }
 
