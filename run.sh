@@ -11,6 +11,3 @@ cmake --build build
 # Run application.
 ./build/bin/assignment1
 
-# Status code, info dump, and exit.
-#echo "Program exited with code $?.  Output written to 'output' directory."
-
