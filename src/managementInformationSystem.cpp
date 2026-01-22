@@ -13,6 +13,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <print>
 #include <ranges>
 #include <span>
@@ -33,7 +34,7 @@ void clearScreen()
 void clearScreenWhenReady()
 {
     std::println("Press `Enter` to continue...");
-    std::cin.get();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     clearScreen();
 }
 
